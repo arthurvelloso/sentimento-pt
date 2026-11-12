@@ -1,0 +1,23 @@
+# Configuração central do projeto: metadados, ruff e pytest num só lugar.
+
+[project]
+name = "sentimento-pt"
+version = "0.1.0"
+description = "Classificação de sentimento em português: TF-IDF, BERTimbau e LLM."
+requires-python = ">=3.12"
+
+[tool.ruff]
+# Comprimento de linha e versão-alvo do Python.
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# Conjunto de regras: erros do pyflakes (F), estilo pycodestyle (E),
+# imports ordenados (I), upgrades de sintaxe (UP) e bugs comuns (B).
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+# Onde ficam os testes e como reconhecê-los.
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"

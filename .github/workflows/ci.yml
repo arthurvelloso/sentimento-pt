@@ -1,0 +1,30 @@
+# Integração contínua: roda lint e testes a cada push e pull request.
+# O badge de status fica verde quando tudo passa (adicione no topo do README).
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar as dependências
+        run: pip install -r requirements.txt
+
+      - name: Lint (ruff)
+        run: make lint
+
+      - name: Testes (pytest)
+        run: make test

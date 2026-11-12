@@ -1,0 +1,28 @@
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Cache do Python e das ferramentas
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Dados e saídas pesadas (não versionar). O B2W-Reviews01 é CC BY-NC-SA 4.0:
+# os textos ficam fora do repositório; só o manifesto do split é versionado.
+data/
+*.npz
+*.csv
+*.joblib
+
+# Manifesto do split (só ids de linha, sem texto): versionar.
+!splits/manifest.csv
+
+# Segredos: NUNCA versionar
+.env
+*.key
+
+# Específicos do sistema
+.DS_Store

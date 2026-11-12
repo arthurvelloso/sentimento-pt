@@ -1,0 +1,196 @@
+{
+  "model": "TF-IDF (palavras 1-2 + caracteres 2-5) + regressão logística",
+  "seed": 42,
+  "config": {
+    "word_ngram": [
+      1,
+      2
+    ],
+    "word_min_df": 2,
+    "word_max_features": 200000,
+    "char_ngram": [
+      2,
+      5
+    ],
+    "char_min_df": 3,
+    "char_max_features": 300000,
+    "max_iter": 500,
+    "grid": {
+      "C": [
+        0.25,
+        1.0,
+        4.0,
+        16.0
+      ],
+      "class_weight": [
+        null,
+        "balanced"
+      ]
+    }
+  },
+  "n_features": 264906,
+  "selection": {
+    "criterion": "macro-F1 na validação",
+    "grid": [
+      {
+        "C": 0.25,
+        "class_weight": null,
+        "val_macro_f1": 0.6879772659303293,
+        "val_accuracy": 0.8427643049611666,
+        "converged": true
+      },
+      {
+        "C": 0.25,
+        "class_weight": "balanced",
+        "val_macro_f1": 0.7171589874562238,
+        "val_accuracy": 0.7915676018386432,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": null,
+        "val_macro_f1": 0.697770056355255,
+        "val_accuracy": 0.8398319860516722,
+        "converged": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "val_macro_f1": 0.7154302235383107,
+        "val_accuracy": 0.8007608178792202,
+        "converged": true
+      },
+      {
+        "C": 4.0,
+        "class_weight": null,
+        "val_macro_f1": 0.6965978963836146,
+        "val_accuracy": 0.8334125851957521,
+        "converged": true
+      },
+      {
+        "C": 4.0,
+        "class_weight": "balanced",
+        "val_macro_f1": 0.7081744740396466,
+        "val_accuracy": 0.8062291963861151,
+        "converged": true
+      },
+      {
+        "C": 16.0,
+        "class_weight": null,
+        "val_macro_f1": 0.6902617545868317,
+        "val_accuracy": 0.8251703915042004,
+        "converged": true
+      },
+      {
+        "C": 16.0,
+        "class_weight": "balanced",
+        "val_macro_f1": 0.699372084239982,
+        "val_accuracy": 0.8058329370740213,
+        "converged": true
+      }
+    ],
+    "best": {
+      "C": 0.25,
+      "class_weight": "balanced",
+      "val_macro_f1": 0.7171589874562238,
+      "val_accuracy": 0.7915676018386432,
+      "converged": true
+    }
+  },
+  "val": {
+    "name": "tfidf+logreg (validação)",
+    "n": 12618,
+    "accuracy": 0.7915676018386432,
+    "macro_f1": 0.7171589874562238,
+    "f1_per_class": {
+      "negativo": 0.8523902292821819,
+      "neutro": 0.43533742331288344,
+      "positivo": 0.8637493097736058
+    },
+    "support": {
+      "negativo": 3256,
+      "neutro": 1577,
+      "positivo": 7785
+    },
+    "confusion_matrix": {
+      "labels": [
+        "negativo",
+        "neutro",
+        "positivo"
+      ],
+      "rows": "classe verdadeira",
+      "cols": "classe prevista",
+      "values": [
+        [
+          2844,
+          359,
+          53
+        ],
+        [
+          297,
+          887,
+          393
+        ],
+        [
+          276,
+          1252,
+          6257
+        ]
+      ]
+    },
+    "latency": {
+      "p50_ms": 1.696666469797492,
+      "p95_ms": 2.90153081296012,
+      "mean_ms": 2.3574063756192722,
+      "n_samples": 300
+    }
+  },
+  "test": {
+    "name": "tfidf+logreg",
+    "n": 12618,
+    "accuracy": 0.7942621651608813,
+    "macro_f1": 0.7230189970251751,
+    "f1_per_class": {
+      "negativo": 0.8643533123028391,
+      "neutro": 0.4420237230694747,
+      "positivo": 0.8626799557032115
+    },
+    "support": {
+      "negativo": 3256,
+      "neutro": 1577,
+      "positivo": 7785
+    },
+    "confusion_matrix": {
+      "labels": [
+        "negativo",
+        "neutro",
+        "positivo"
+      ],
+      "rows": "classe verdadeira",
+      "cols": "classe prevista",
+      "values": [
+        [
+          2877,
+          329,
+          50
+        ],
+        [
+          283,
+          913,
+          381
+        ],
+        [
+          241,
+          1312,
+          6232
+        ]
+      ]
+    },
+    "latency": {
+      "p50_ms": 1.459229039028287,
+      "p95_ms": 2.3329705465584993,
+      "mean_ms": 1.5644188690930605,
+      "n_samples": 300
+    }
+  }
+}

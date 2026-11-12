@@ -1,0 +1,41 @@
+{
+  "seed": 42,
+  "source_url": "https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv",
+  "raw_sha256": "821fb0bf9f7230b0fba4e4f9fadd75a66d1a9ff0b1657810791d33007eb2ab38",
+  "rotulo": "1-2 negativo | 3 neutro | 4-5 positivo",
+  "limpeza": {
+    "raw": 132373,
+    "invalid_rating": 0,
+    "null_text": 3275,
+    "empty_text": 106,
+    "conflicting_duplicates_removed": 188,
+    "duplicates_removed": 2624,
+    "clean": 126180
+  },
+  "splits": {
+    "train": {
+      "n": 100944,
+      "por_classe": {
+        "negativo": 26051,
+        "neutro": 12616,
+        "positivo": 62277
+      }
+    },
+    "val": {
+      "n": 12618,
+      "por_classe": {
+        "negativo": 3256,
+        "neutro": 1577,
+        "positivo": 7785
+      }
+    },
+    "test": {
+      "n": 12618,
+      "por_classe": {
+        "negativo": 3256,
+        "neutro": 1577,
+        "positivo": 7785
+      }
+    }
+  }
+}

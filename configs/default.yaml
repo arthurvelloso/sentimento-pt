@@ -1,0 +1,35 @@
+# Configuração do projeto. Mudou aqui, muda o experimento: commite junto.
+
+seed: 42
+
+data:
+  # CSV fixado por commit no GitHub da B2W Digital (B2W-Reviews01).
+  url: https://raw.githubusercontent.com/americanas-tech/b2w-reviews01/4639429ec698d7821fc99a0bc665fa213d9fcd5a/B2W-Reviews01.csv
+  sha256: 821fb0bf9f7230b0fba4e4f9fadd75a66d1a9ff0b1657810791d33007eb2ab38 # verificado a cada uso
+  raw_path: data/raw/B2W-Reviews01.csv
+  text_col: review_text
+  rating_col: overall_rating
+
+# Regra do rótulo (também documentada no README): nota -> classe
+#   1-2 -> negativo | 3 -> neutro | 4-5 -> positivo
+split:
+  train: 0.8
+  val: 0.1
+  test: 0.1
+  manifest_path: splits/manifest.csv
+  meta_path: splits/meta.json
+
+tfidf:
+  word_ngram: [1, 2]
+  word_min_df: 2
+  word_max_features: 200000
+  char_ngram: [2, 5]
+  char_min_df: 3
+  char_max_features: 300000
+  max_iter: 500
+  # Hiperparâmetros escolhidos na validação (macro-F1).
+  grid:
+    C: [0.25, 1.0, 4.0, 16.0]
+    class_weight: [null, balanced]
+
+results_path: results/tfidf.json

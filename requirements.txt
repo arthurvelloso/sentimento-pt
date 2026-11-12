@@ -1,0 +1,11 @@
+# Dependências com versões fixas (pinned).
+# Para atualizar: mude o número, rode os testes e só então faça o commit.
+
+numpy==2.5.4
+pandas==3.1.1
+scikit-learn==1.9.1
+PyYAML==6.0.3
+
+# --- ferramentas de desenvolvimento ---
+pytest==9.2.0
+ruff==0.17.4
