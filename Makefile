@@ -1,7 +1,7 @@
 # Atalhos para as tarefas do dia a dia.
 # Rode `make` ou `make help` para ver os comandos.
 
-.PHONY: help install test lint format data baseline clean
+.PHONY: help install test lint format data baseline bert clean
 
 help:  ## Lista os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -26,6 +26,9 @@ data:  ## Baixa o B2W-Reviews01, limpa e grava o manifesto do split
 
 baseline:  ## Baseline TF-IDF + regressão logística; grava results/tfidf.json
 	python -m src.baseline_tfidf
+
+bert:  ## Fine-tuning do BERTimbau (precisa de GPU e requirements-train.txt; ver notebook)
+	python -m src.train_bert
 
 clean:  ## Remove arquivos temporários
 	rm -rf .pytest_cache .ruff_cache __pycache__ src/__pycache__ tests/__pycache__

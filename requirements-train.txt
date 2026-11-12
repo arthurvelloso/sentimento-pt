@@ -1,0 +1,10 @@
+# Dependências só do fine-tuning (não entram na CI, que é leve).
+# No Kaggle/Colab o torch já vem instalado e com CUDA: NÃO reinstale (o pip
+# baixaria outra build). Instale só o que está abaixo:
+#
+#     pip install -q -r requirements-train.txt
+#
+# Localmente, instale também o torch:  pip install torch==2.15.0
+
+transformers==5.22.2
+accelerate==1.15.0

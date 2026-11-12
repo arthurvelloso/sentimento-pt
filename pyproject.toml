@@ -16,6 +16,10 @@ target-version = "py312"
 # imports ordenados (I), upgrades de sintaxe (UP) e bugs comuns (B).
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+# Comandos de shell (`!python ...`) em notebooks não devem ser quebrados em várias linhas.
+"*.ipynb" = ["E501"]
+
 [tool.pytest.ini_options]
 # Onde ficam os testes e como reconhecê-los.
 testpaths = ["tests"]

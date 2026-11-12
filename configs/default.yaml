@@ -33,3 +33,18 @@ tfidf:
     class_weight: [null, balanced]
 
 results_path: results/tfidf.json
+
+# Fine-tuning do BERTimbau (src/train_bert.py)
+bert:
+  model_name: neuralmind/bert-base-portuguese-cased
+  max_length_percentile: 95 # cobre 95% dos textos; o resto é truncado
+  learning_rate: 3.0e-5 # faixa recomendada para BERT: 2e-5 a 5e-5
+  epochs: 3
+  batch_size: 32
+  eval_batch_size: 128
+  warmup_ratio: 0.1 # fração dos passos de treino com LR subindo de 0
+  weight_decay: 0.01
+  train_subset: null # número inteiro limita o treino (use se passar de ~1 h)
+  hub_repo: null # "usuario/nome": sobe o modelo (privado) a cada época
+  output_dir: outputs/bertimbau
+  results_path: results/bertimbau.json

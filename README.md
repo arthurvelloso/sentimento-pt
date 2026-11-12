@@ -8,7 +8,8 @@ um baseline TF-IDF, o BERTimbau ajustado e um LLM. Comparação em qualidade,
 latência e custo.
 
 > **Status:** em construção. Dados, avaliador único e baseline TF-IDF estão
-> prontos. BERTimbau e LLM entram nos próximos passos e vão na mesma tabela.
+> prontos. O script de fine-tuning do BERTimbau está pronto e testado; falta
+> treinar na GPU e preencher a linha da tabela. O LLM vem depois.
 
 ## Resultado
 
@@ -17,7 +18,7 @@ Conjunto de teste (12.618 avaliações), usado uma única vez:
 | Modelo | Macro-F1 | Acurácia | Latência p50 / p95 |
 | --- | --- | --- | --- |
 | TF-IDF + regressão logística | **0,723** | 79,4% | 1,5 ms / 2,3 ms |
-| BERTimbau ajustado | — | — | — |
+| BERTimbau ajustado | _a treinar na GPU_ | — | — |
 | LLM (zero/few-shot e QLoRA) | — | — | — |
 
 F1 por classe do baseline: negativo 0,864 · **neutro 0,442** · positivo 0,863.
@@ -74,6 +75,35 @@ make baseline   # treina, escolhe na validação, avalia no teste, grava results
 O `make baseline` é lento: a grade tem 8 regressões logísticas sobre ~265 mil
 features, o que levou algumas dezenas de minutos no meu Mac.
 
+## Fine-tuning do BERTimbau
+
+[`neuralmind/bert-base-portuguese-cased`](https://huggingface.co/neuralmind/bert-base-portuguese-cased)
+ajustado com `src/train_bert.py`, sobre os mesmos splits e o mesmo avaliador do
+baseline. O treino precisa de GPU: neste Mac (MPS) medi cerca de 1,6 s por passo
+de 32 exemplos, o que dá, por extrapolação, algo como 4 horas para as 3 épocas.
+No Kaggle ou no Colab, use o notebook
+[`notebooks/bertimbau_train.ipynb`](notebooks/bertimbau_train.ipynb).
+
+| Escolha | Valor | Por quê |
+| --- | --- | --- |
+| Comprimento máximo | percentil 95 dos tamanhos em tokens, arredondado a múltiplo de 8 | padding até 512 desperdiça memória; truncar 5% dos textos custa pouco |
+| Learning rate | 3e-5 (faixa usual do BERT: 2e-5 a 5e-5) | |
+| Épocas / batch | 3 / 32 | |
+| Warmup | 10% dos passos, depois decaimento linear | |
+| Precisão | fp16 em GPU CUDA | |
+| Melhor checkpoint | época com maior **macro-F1 na validação** | mesma métrica do baseline |
+
+O teste é avaliado uma única vez, com o melhor checkpoint. Um treino parcial
+(`--train-subset`) é marcado com `is_subset: true` no JSON, para não ser
+confundido com o resultado final. O modelo vai para um repositório **privado** no
+Hub a cada época (`--hub-repo`), para uma sessão de GPU que caia não perder o treino.
+
+```bash
+pip install -r requirements-train.txt   # e o torch, se não estiver instalado
+python -m src.train_bert --hub-repo SEU_USUARIO/bertimbau-sentimento-b2w
+# outras seeds:  --seed 1  (grava em results/bertimbau_seed1.json)
+```
+
 ## Como o baseline foi escolhido
 
 TF-IDF de palavras (1-2 gramas) junto com n-gramas de caracteres (2-5), que pegam
@@ -104,6 +134,9 @@ neutra. Por isso a métrica principal é macro-F1 e não acurácia.
 - **Limpeza antes do split**, com SHA-256 do arquivo e manifesto versionado: o split é
   auditável e reproduzível sem publicar os textos.
 - **Teste tocado uma vez**, depois de fixar tudo na validação.
+- **BERTimbau sem pesos de classe na loss.** É a receita padrão, mas o baseline ganhou
+  com `class_weight="balanced"`, então a comparação favorece um pouco o TF-IDF na classe
+  neutra. Uma loss ponderada fica como ablação.
 
 ## Limitações
 
@@ -118,6 +151,11 @@ neutra. Por isso a métrica principal é macro-F1 e não acurácia.
 - **Um domínio e um período:** e-commerce brasileiro, jan-mai de 2018. Não há
   garantia de que generaliza para outros textos.
 - **Uma seed e um split.** Não há intervalo de confiança.
+- **A CI não treina o BERT.** Ela roda sem `torch` (leve), então os testes que treinam um
+  BERT minúsculo são pulados lá e rodam só localmente (34 testes com torch, 31 sem).
+- **O envio ao Hub foi escrito com as assinaturas conferidas, mas não testado ponta a
+  ponta** (não havia token na máquina de desenvolvimento). A rodada rápida do notebook
+  existe para pegar qualquer problema nisso antes do treino longo.
 
 ## Estrutura
 
@@ -128,11 +166,13 @@ neutra. Por isso a métrica principal é macro-F1 e não acurácia.
 │   ├── data.py            # download, rótulo, limpeza, split, manifesto
 │   ├── prepare.py         # make data
 │   ├── evaluate.py        # avaliador único (qualidade + latência)
-│   └── baseline_tfidf.py  # make baseline
+│   ├── baseline_tfidf.py  # make baseline
+│   └── train_bert.py      # fine-tuning do BERTimbau (GPU)
 ├── splits/                # manifest.csv (ids por split) e meta.json (contagens)
-├── results/tfidf.json     # métricas de validação e teste
+├── results/               # tfidf.json e, depois do treino, bertimbau.json
 ├── tests/
-└── notebooks/
+├── notebooks/bertimbau_train.ipynb  # roda o fine-tuning no Kaggle ou no Colab
+└── requirements-train.txt # transformers e accelerate (fora da CI)
 ```
 
 ## Licença

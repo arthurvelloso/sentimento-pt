@@ -13,9 +13,11 @@ __pycache__/
 # Dados e saídas pesadas (não versionar). O B2W-Reviews01 é CC BY-NC-SA 4.0:
 # os textos ficam fora do repositório; só o manifesto do split é versionado.
 data/
+outputs/
 *.npz
 *.csv
 *.joblib
+*.safetensors
 
 # Manifesto do split (só ids de linha, sem texto): versionar.
 !splits/manifest.csv
