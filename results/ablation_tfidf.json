@@ -1,0 +1,113 @@
+{
+  "seed": 42,
+  "config": {
+    "C": 0.25,
+    "class_weight": "balanced",
+    "val_macro_f1": 0.7171589874562238,
+    "val_accuracy": 0.7915676018386432,
+    "converged": true
+  },
+  "reproduces_baseline": {
+    "baseline_test_macro_f1": 0.7230189970251751,
+    "abs_diff": 0.0,
+    "reproduces": true
+  },
+  "rows": [
+    {
+      "fraction": 0.1,
+      "n_train": 10094,
+      "train_seconds": 1.7,
+      "converged": true,
+      "val": {
+        "macro_f1": 0.6956621893624506,
+        "accuracy": 0.7782532889522904,
+        "f1_per_class": {
+          "negativo": 0.8251954565570143,
+          "neutro": 0.4061776061776062,
+          "positivo": 0.8556135053527313
+        }
+      },
+      "test": {
+        "macro_f1": 0.7003060469370386,
+        "accuracy": 0.781106355999366,
+        "f1_per_class": {
+          "negativo": 0.8326446280991735,
+          "neutro": 0.4110913253625032,
+          "positivo": 0.8571821873494391
+        }
+      }
+    },
+    {
+      "fraction": 0.25,
+      "n_train": 25236,
+      "train_seconds": 5.1,
+      "converged": true,
+      "val": {
+        "macro_f1": 0.7057820264629955,
+        "accuracy": 0.7849896972578856,
+        "f1_per_class": {
+          "negativo": 0.8376296296296296,
+          "neutro": 0.4194851085310449,
+          "positivo": 0.8602313412283118
+        }
+      },
+      "test": {
+        "macro_f1": 0.7108623399607191,
+        "accuracy": 0.7875257568552861,
+        "f1_per_class": {
+          "negativo": 0.8479385251958031,
+          "neutro": 0.42567059413386815,
+          "positivo": 0.8589779005524862
+        }
+      }
+    },
+    {
+      "fraction": 0.5,
+      "n_train": 50472,
+      "train_seconds": 10.6,
+      "converged": true,
+      "val": {
+        "macro_f1": 0.710441235756463,
+        "accuracy": 0.7864954826438422,
+        "f1_per_class": {
+          "negativo": 0.8442782348541511,
+          "neutro": 0.42607626076260763,
+          "positivo": 0.8609692116526301
+        }
+      },
+      "test": {
+        "macro_f1": 0.7134464479413479,
+        "accuracy": 0.7864162307814233,
+        "f1_per_class": {
+          "negativo": 0.8541448058761805,
+          "neutro": 0.42853688029020554,
+          "positivo": 0.8576576576576577
+        }
+      }
+    },
+    {
+      "fraction": 1.0,
+      "n_train": 100944,
+      "train_seconds": 23.4,
+      "converged": true,
+      "val": {
+        "macro_f1": 0.7171589874562238,
+        "accuracy": 0.7915676018386432,
+        "f1_per_class": {
+          "negativo": 0.8523902292821819,
+          "neutro": 0.43533742331288344,
+          "positivo": 0.8637493097736058
+        }
+      },
+      "test": {
+        "macro_f1": 0.7230189970251751,
+        "accuracy": 0.7942621651608813,
+        "f1_per_class": {
+          "negativo": 0.8643533123028391,
+          "neutro": 0.4420237230694747,
+          "positivo": 0.8626799557032115
+        }
+      }
+    }
+  ]
+}

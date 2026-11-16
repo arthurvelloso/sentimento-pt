@@ -1,0 +1,96 @@
+{
+  "split": "test",
+  "n_comum": 12618,
+  "comparacao": [
+    {
+      "model": "TF-IDF",
+      "n": 12618,
+      "macro_f1": 0.7230189970251751,
+      "accuracy": 0.7942621651608813,
+      "f1_per_class": {
+        "negativo": 0.8643533123028391,
+        "neutro": 0.4420237230694747,
+        "positivo": 0.8626799557032115
+      },
+      "invalid_share": 0.0
+    }
+  ],
+  "por_nota": {
+    "TF-IDF": [
+      {
+        "rating": 1,
+        "n": 2483,
+        "accuracy": 0.9399919452275474,
+        "previsto_como": {
+          "negativo": 0.9399919452275474,
+          "neutro": 0.045912202980265805,
+          "positivo": 0.014095851792186871
+        }
+      },
+      {
+        "rating": 2,
+        "n": 773,
+        "accuracy": 0.702457956015524,
+        "previsto_como": {
+          "negativo": 0.702457956015524,
+          "neutro": 0.278137128072445,
+          "positivo": 0.019404915912031046
+        }
+      },
+      {
+        "rating": 3,
+        "n": 1577,
+        "accuracy": 0.5789473684210527,
+        "previsto_como": {
+          "negativo": 0.1794546607482562,
+          "neutro": 0.5789473684210527,
+          "positivo": 0.24159797083069118
+        }
+      },
+      {
+        "rating": 4,
+        "n": 3173,
+        "accuracy": 0.6895682319571383,
+        "previsto_como": {
+          "negativo": 0.03813425780018909,
+          "neutro": 0.27229751024267257,
+          "positivo": 0.6895682319571383
+        }
+      },
+      {
+        "rating": 5,
+        "n": 4612,
+        "accuracy": 0.8768430182133564,
+        "previsto_como": {
+          "negativo": 0.026019080659150044,
+          "neutro": 0.0971379011274935,
+          "positivo": 0.8768430182133564
+        }
+      }
+    ]
+  },
+  "por_tamanho": {
+    "TF-IDF": [
+      {
+        "faixa": "1-5 palavras",
+        "n": 80,
+        "accuracy": 0.75
+      },
+      {
+        "faixa": "6-15",
+        "n": 6048,
+        "accuracy": 0.8172949735449735
+      },
+      {
+        "faixa": "16-40",
+        "n": 4943,
+        "accuracy": 0.77746307910176
+      },
+      {
+        "faixa": "mais de 40",
+        "n": 1547,
+        "accuracy": 0.7601809954751131
+      }
+    ]
+  }
+}

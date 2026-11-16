@@ -24,12 +24,10 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.model_selection import train_test_split
 
 from src.config import load_config
-from src.data import LABELS, load_splits
+from src.data import LABELS, load_splits, stratified_subset
 from src.evaluate import evaluate, save_result
 
 # ----------------------------------------------------------------- utilitários
@@ -69,16 +67,6 @@ def compute_metrics(eval_pred: Any) -> dict[str, float]:
         "macro_f1": float(f1_score(labels, predicted, average="macro")),
         "accuracy": float(accuracy_score(labels, predicted)),
     }
-
-
-def stratified_subset(frame: pd.DataFrame, n: int | None, seed: int) -> pd.DataFrame:
-    """Amostra ``n`` linhas mantendo a proporção das classes. ``None`` devolve tudo."""
-    if n is None or n >= len(frame):
-        return frame
-    if n < len(np.unique(frame["label"])):
-        raise ValueError("subconjunto menor que o número de classes")
-    sampled, _ = train_test_split(frame, train_size=n, stratify=frame["label"], random_state=seed)
-    return sampled.reset_index(drop=True)
 
 
 def resolve_results_path(config: dict[str, Any], seed: int, override: str | None) -> Path:

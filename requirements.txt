@@ -5,6 +5,7 @@ numpy==2.5.4
 pandas==3.1.1
 scikit-learn==1.9.1
 PyYAML==6.0.3
+matplotlib==3.11.2  # figuras da análise de erros (make analysis)
 
 # --- ferramentas de desenvolvimento ---
 pytest==9.2.0

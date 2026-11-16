@@ -48,3 +48,15 @@ bert:
   hub_repo: null # "usuario/nome": sobe o modelo (privado) a cada época
   output_dir: outputs/bertimbau
   results_path: results/bertimbau.json
+
+# LLM aberto em zero-shot e few-shot (src/llm_classify.py)
+llm:
+  # Apache 2.0; 4 bi de parâmetros, cabe numa T4 em fp16 e usa atenção padrão. O Qwen3.5
+  # (mais novo) cai numa implementação lenta sem kernels extras, e não pude medir isso na T4.
+  model_name: Qwen/Qwen3-4B
+  max_review_chars: 1200 # avaliações maiores são cortadas no prompt
+  max_new_tokens: 6 # a resposta é uma palavra
+  batch_size: 16
+  shots_per_class: 3 # few-shot: 3 exemplos de cada classe (9 no total)
+  eval_subset: 3000 # subconjunto estratificado do teste (o teste inteiro é lento em T4)
+  dev_subset: 600 # subconjunto da validação, para iterar no prompt

@@ -19,8 +19,15 @@ outputs/
 *.joblib
 *.safetensors
 
-# Manifesto do split (só ids de linha, sem texto): versionar.
+# Manifesto do split e previsões por exemplo (só ids de linha e rótulos, sem texto): versionar.
 !splits/manifest.csv
+!results/preds_*.csv
+
+# Amostras com o texto das avaliações (para leitura manual): não versionar.
+analysis/
+
+# Rodadas de desenvolvimento (iteração do prompt na validação): não versionar.
+results/dev/
 
 # Segredos: NUNCA versionar
 .env

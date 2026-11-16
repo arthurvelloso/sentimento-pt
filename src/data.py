@@ -136,6 +136,20 @@ def clean(
 # ------------------------------------------------------------------------ split
 
 
+def stratified_subset(frame: pd.DataFrame, n: int | None, seed: int) -> pd.DataFrame:
+    """Amostra ``n`` linhas mantendo a proporção das classes. ``None`` devolve tudo.
+
+    A mesma ``seed`` dá sempre o mesmo subconjunto, e subconjuntos menores não são
+    necessariamente contidos nos maiores (cada um é uma amostra independente).
+    """
+    if n is None or n >= len(frame):
+        return frame
+    if n < len(np.unique(frame["label"])):
+        raise ValueError("subconjunto menor que o número de classes")
+    sampled, _ = train_test_split(frame, train_size=n, stratify=frame["label"], random_state=seed)
+    return sampled.reset_index(drop=True)
+
+
 def make_splits(clean_frame: pd.DataFrame, fractions: dict[str, float], seed: int) -> pd.Series:
     """Split estratificado por rótulo. Devolve o nome do split de cada linha."""
     labels = clean_frame["label"].to_numpy()

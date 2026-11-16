@@ -1,7 +1,7 @@
 # Atalhos para as tarefas do dia a dia.
 # Rode `make` ou `make help` para ver os comandos.
 
-.PHONY: help install test lint format data baseline bert clean
+.PHONY: help install test lint format data baseline bert ablation-tfidf analysis clean
 
 help:  ## Lista os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -29,6 +29,12 @@ baseline:  ## Baseline TF-IDF + regressão logística; grava results/tfidf.json
 
 bert:  ## Fine-tuning do BERTimbau (precisa de GPU e requirements-train.txt; ver notebook)
 	python -m src.train_bert
+
+ablation-tfidf:  ## Curva de tamanho de dados do TF-IDF (10/25/50/100%) e previsões por exemplo
+	python -m src.ablation_tfidf
+
+analysis:  ## Análise de erros: matrizes de confusão, erros por nota e amostra para leitura
+	python -m src.analysis
 
 clean:  ## Remove arquivos temporários
 	rm -rf .pytest_cache .ruff_cache __pycache__ src/__pycache__ tests/__pycache__

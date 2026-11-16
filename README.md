@@ -7,9 +7,9 @@ produtos em português, com três abordagens comparadas pelo **mesmo avaliador**
 um baseline TF-IDF, o BERTimbau ajustado e um LLM. Comparação em qualidade,
 latência e custo.
 
-> **Status:** em construção. Dados, avaliador único e baseline TF-IDF estão
-> prontos. O script de fine-tuning do BERTimbau está pronto e testado; falta
-> treinar na GPU e preencher a linha da tabela. O LLM vem depois.
+> **Status:** em construção. Dados, avaliador único, baseline TF-IDF, fine-tuning do
+> BERTimbau e a análise de erros do TF-IDF estão prontos. Falta o que depende de GPU:
+> a análise de erros e a ablação de dados do BERTimbau, e o LLM (zero/few-shot e QLoRA).
 
 ## Resultado
 
@@ -17,16 +17,18 @@ Conjunto de teste (12.618 avaliações), usado uma única vez:
 
 | Modelo | Macro-F1 | Acurácia | Latência p50 / p95 |
 | --- | --- | --- | --- |
-| TF-IDF + regressão logística | **0,723** | 79,4% | 1,5 ms / 2,3 ms |
-| BERTimbau ajustado | _a treinar na GPU_ | — | — |
+| TF-IDF + regressão logística | 0,723 | 79,4% | 1,5 ms / 2,3 ms (CPU) |
+| BERTimbau ajustado | **0,761** | **86,8%** | 12,1 ms / 16,1 ms (GPU T4) |
 | LLM (zero/few-shot e QLoRA) | — | — | — |
 
 F1 por classe do baseline: negativo 0,864 · **neutro 0,442** · positivo 0,863.
 A classe neutra é a difícil: 42% dos neutros são previstos como outra classe,
 e 17% dos positivos (notas 4-5) são previstos como neutros.
 
-A latência é por exemplo (um texto por chamada, incluindo a vetorização), em CPU
-de um Apple M5. Ela depende da máquina; as métricas de qualidade não.
+A latência é por exemplo (um texto por chamada, incluindo a vetorização e a
+tokenização). **As duas latências não são comparáveis entre si**: o TF-IDF foi medido
+numa CPU Apple M5 e o BERTimbau numa GPU Tesla T4 do Colab. Não medi o BERTimbau em
+CPU. As métricas de qualidade não dependem da máquina.
 
 O resultado completo (matriz de confusão, grade de validação) está em
 [`results/tfidf.json`](results/tfidf.json).
@@ -70,10 +72,13 @@ pip install -r requirements.txt
 make test       # testes com dados sintéticos, não baixam nada
 make data       # baixa o CSV (49 MB), limpa e confere o manifesto do split
 make baseline   # treina, escolhe na validação, avalia no teste, grava results/tfidf.json
+make ablation-tfidf  # TF-IDF com 10/25/50/100% do treino + previsões por exemplo (~1 min)
+make analysis        # erros por nota e por tamanho, matrizes de confusão, amostra de erros
 ```
 
 O `make baseline` é lento: a grade tem 8 regressões logísticas sobre ~265 mil
-features, o que levou algumas dezenas de minutos no meu Mac.
+features, o que levou algumas dezenas de minutos no meu Mac. O `make ablation-tfidf`
+reaproveita a melhor combinação da grade e leva cerca de 1 minuto.
 
 ## Fine-tuning do BERTimbau
 
@@ -92,6 +97,19 @@ No Kaggle ou no Colab, use o notebook
 | Warmup | 10% dos passos, depois decaimento linear | |
 | Precisão | fp16 em GPU CUDA | |
 | Melhor checkpoint | época com maior **macro-F1 na validação** | mesma métrica do baseline |
+
+**Treino completo** (100.944 exemplos, seed 42), em 23,6 minutos numa Tesla T4:
+
+| Época | Macro-F1 (val) | Acurácia (val) | Loss (val) |
+| --- | --- | --- | --- |
+| 1 | 0,744 | 86,3% | 0,367 |
+| **2** (escolhida) | **0,747** | 86,1% | 0,379 |
+| 3 | 0,745 | 85,9% | 0,419 |
+
+O macro-F1 praticamente não muda entre as épocas (diferença de 0,003, provavelmente
+dentro do ruído de uma seed), enquanto a loss de validação sobe: o modelo começa a
+sobreajustar depois da primeira época. No teste, o checkpoint da época 2 dá macro-F1
+de 0,761 e acurácia de 86,8%.
 
 O teste é avaliado uma única vez, com o melhor checkpoint. Um treino parcial
 (`--train-subset`) é marcado com `is_subset: true` no JSON, para não ser
@@ -125,6 +143,49 @@ erros de digitação e variações comuns em avaliações. Regressão logística
 de 4 pontos de acurácia: troca acertos na classe majoritária por acertos na
 neutra. Por isso a métrica principal é macro-F1 e não acurácia.
 
+## Onde o TF-IDF erra
+
+Análise sobre as 12.618 avaliações do teste (`make analysis`), juntando a **nota original**
+às previsões. O que o rótulo de 3 classes esconde fica visível por nota:
+
+| Nota | Avaliações | Acerto | Previsto como negativo / neutro / positivo |
+| --- | --- | --- | --- |
+| 1 | 2.483 | 94,0% | 94% / 5% / 1% |
+| 2 | 773 | 70,2% | 70% / 28% / 2% |
+| **3 (neutro)** | 1.577 | **57,9%** | 18% / 58% / 24% |
+| 4 | 3.173 | 69,0% | 4% / 27% / 69% |
+| 5 | 4.612 | 87,7% | 3% / 10% / 88% |
+
+O erro se concentra **nas notas vizinhas ao neutro** (2, 3 e 4), e as notas extremas vão
+bem. Isso sugere que parte dos "erros" é fronteira entre classes (uma nota 4 com texto
+morno, uma nota 2 com texto brando), e não falta de compreensão. É uma leitura dos números,
+ainda não confirmada lendo os textos.
+
+Por tamanho do texto a acurácia varia pouco (82% em textos de 6 a 15 palavras, 76% nos de
+mais de 40). Figuras: [`confusao.png`](results/figures/confusao.png) e
+[`acuracia_por_nota.png`](results/figures/acuracia_por_nota.png).
+
+## Quanto dado cada modelo precisa
+
+Mesma configuração do baseline (`C=0,25`, `class_weight="balanced"`), treinada com
+frações do treino. O ponto de 100% reproduz exatamente o macro-F1 do baseline (0,7230),
+o que confere o pipeline.
+
+| Fração | Exemplos | Macro-F1 (validação) | Macro-F1 (teste) |
+| --- | --- | --- | --- |
+| 10% | 10.094 | 0,696 | 0,700 |
+| 25% | 25.236 | 0,706 | 0,711 |
+| 50% | 50.472 | 0,710 | 0,713 |
+| 100% | 100.944 | 0,717 | 0,723 |
+
+O TF-IDF **satura cedo**: 10 vezes mais dados rendem 2,3 pontos de macro-F1. A curva
+lê o teste uma vez por tamanho, para descrever a tendência; nenhuma escolha é feita com ele.
+
+**Ainda por fazer (precisa de GPU):** a mesma curva para o BERTimbau, as previsões por
+exemplo do BERTimbau (para a análise de erros dele e a leitura de 40 erros) e o LLM. Tudo
+isso roda em [`notebooks/dia11_gpu.ipynb`](notebooks/dia11_gpu.ipynb), que devolve os
+arquivos para este repositório.
+
 ## Decisões
 
 - **Macro-F1 como métrica principal.** As classes são desbalanceadas (62% positivo),
@@ -150,7 +211,9 @@ neutra. Por isso a métrica principal é macro-F1 e não acurácia.
   parte do que a classe neutra tem de difícil.
 - **Um domínio e um período:** e-commerce brasileiro, jan-mai de 2018. Não há
   garantia de que generaliza para outros textos.
-- **Uma seed e um split.** Não há intervalo de confiança.
+- **Uma seed e um split.** Não há intervalo de confiança. O fine-tuning de BERT
+  varia entre seeds, então a diferença de 3,8 pontos de macro-F1 sobre o TF-IDF
+  ainda não tem a variação do BERT medida.
 - **A CI não treina o BERT.** Ela roda sem `torch` (leve), então os testes que treinam um
   BERT minúsculo são pulados lá e rodam só localmente (34 testes com torch, 31 sem).
 - **O envio ao Hub foi escrito com as assinaturas conferidas, mas não testado ponta a
@@ -167,11 +230,18 @@ neutra. Por isso a métrica principal é macro-F1 e não acurácia.
 │   ├── prepare.py         # make data
 │   ├── evaluate.py        # avaliador único (qualidade + latência)
 │   ├── baseline_tfidf.py  # make baseline
-│   └── train_bert.py      # fine-tuning do BERTimbau (GPU)
+│   ├── ablation_tfidf.py  # curva de tamanho de dados do TF-IDF + previsões
+│   ├── train_bert.py      # fine-tuning do BERTimbau (GPU)
+│   ├── predict_bert.py    # previsões por exemplo do BERTimbau (GPU)
+│   ├── ablation_bert.py   # agrega a curva de dados do BERTimbau
+│   ├── llm_classify.py    # LLM em zero/few-shot (GPU)
+│   ├── predictions.py     # formato das previsões por exemplo (sem texto)
+│   └── analysis.py        # análise de erros e comparação entre modelos
 ├── splits/                # manifest.csv (ids por split) e meta.json (contagens)
-├── results/               # tfidf.json e, depois do treino, bertimbau.json
+├── results/               # métricas (.json), previsões (preds_*.csv) e figuras
 ├── tests/
-├── notebooks/bertimbau_train.ipynb  # roda o fine-tuning no Kaggle ou no Colab
+├── notebooks/bertimbau_train.ipynb  # fine-tuning no Kaggle ou no Colab
+├── notebooks/dia11_gpu.ipynb        # previsões, ablação e LLM na GPU
 └── requirements-train.txt # transformers e accelerate (fora da CI)
 ```
 
