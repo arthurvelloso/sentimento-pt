@@ -217,9 +217,21 @@ def slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
-def load_llm(name: str, dtype: str | None = None) -> tuple[Any, Any, str]:
-    """Carrega tokenizador e modelo na melhor opção disponível. Devolve ``(modelo, tok, dtype)``."""
+def load_llm(
+    name: str, dtype: str | None = None, adapter: str | None = None
+) -> tuple[Any, Any, str]:
+    """Carrega tokenizador e modelo na melhor opção disponível. Devolve ``(modelo, tok, dtype)``.
+
+    Com ``adapter`` (pasta local ou repositório do Hub), carrega a base em 4 bits, como no
+    treino QLoRA, e aplica o adaptador.
+    """
     import torch
+
+    if adapter:
+        from src.qlora import load_with_adapter
+
+        model, tokenizer = load_with_adapter(name, adapter)
+        return model, tokenizer, "nf4+float16"
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     if torch.cuda.is_available():
@@ -272,7 +284,9 @@ def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
     }
     seed = int(config["seed"])
     split = options.get("split") or "test"
-    shots_per_class = int(cfg["shots_per_class"])
+    adapter = options.get("adapter")
+    # O adaptador foi treinado com o prompt zero-shot, então a avaliação também é zero-shot.
+    shots_per_class = 0 if adapter else int(cfg["shots_per_class"])
     subset = resolve_eval_subset(options.get("max_eval"), split, cfg)
 
     splits = load_splits(config)
@@ -283,7 +297,7 @@ def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
         f"{shots_per_class} exemplo(s) por classe | prompt {PROMPT_VERSION}"
     )
 
-    model, tokenizer, dtype = load_llm(cfg["model_name"], options.get("dtype"))
+    model, tokenizer, dtype = load_llm(cfg["model_name"], options.get("dtype"), adapter)
     settings = {
         "max_chars": int(cfg["max_review_chars"]),
         "batch_size": int(cfg["batch_size"]),
@@ -301,6 +315,8 @@ def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
 
     started = time.perf_counter()
     kind = f"{len(shots)}-shot" if shots else "zero-shot"
+    if adapter:
+        kind += " + QLoRA"
     name = f"{cfg['model_name']} {kind}"
     result = evaluate(
         predict_fn,
@@ -319,6 +335,7 @@ def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
             "model": cfg["model_name"],
             "split": split,
             "shots_per_class": shots_per_class,
+            "adapter": adapter,
             "prompt_version": PROMPT_VERSION,
             "prompt": {"system": SYSTEM_PROMPT, "shots": shots},
             "seed": seed,
@@ -338,7 +355,7 @@ def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
     )
 
     out_dir = Path("results") if split == "test" else Path("results/dev")
-    stem = f"llm_{slugify(cfg['model_name'])}_{len(shots)}shot"
+    stem = f"llm_{slugify(cfg['model_name'])}{'-qlora' if adapter else ''}_{len(shots)}shot"
     save_result(result, out_dir / f"{stem}.json")
     save_predictions(
         make_frame(split, evaluation["row_id"], evaluation["label"], preds),
@@ -356,6 +373,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-eval", type=int, dest="max_eval", help="subconjunto estratificado")
     parser.add_argument("--batch-size", type=int, dest="batch_size")
     parser.add_argument("--max-new-tokens", type=int, dest="max_new_tokens")
+    parser.add_argument("--adapter", help="adaptador QLoRA (pasta ou repositório do Hub)")
     parser.add_argument("--dtype", choices=["float16", "bfloat16", "float32"])
     parser.add_argument("--latency-samples", type=int, dest="latency_samples")
     return parser.parse_args(argv)

@@ -352,6 +352,8 @@ def llm_label(preds_path: Path) -> str:
         saved = json.loads(result_path.read_text(encoding="utf-8"))
         shots = len(saved.get("prompt", {}).get("shots", []))
         model = str(saved.get("model", stem)).split("/")[-1]
+        if saved.get("adapter"):
+            return f"{model} + QLoRA"
         return f"{model} {shots}-shot" if shots else f"{model} zero-shot"
     return stem.removeprefix("llm_").replace("_", " ")
 

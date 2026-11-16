@@ -8,3 +8,5 @@
 
 transformers==5.22.2
 accelerate==1.15.0
+peft==0.21.3
+bitsandbytes==0.50.2

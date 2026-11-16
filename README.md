@@ -181,6 +181,22 @@ erro, mas **nenhuma das 25.236 respostas foi inválida** (duas rodadas de 12.618
   foi corrigido e há um teste de regressão. Os resultados valem para o conjunto inteiro, que é
   a comparação mais direta com os outros modelos.
 
+## LLM ajustado com QLoRA
+Código pronto; os resultados entram aqui depois da rodada na GPU.
+
+- **Método:** o Qwen3-4B fica congelado em 4 bits (NF4, com *double quantization*) e só um
+  adaptador LoRA é treinado (`r=16`, `alpha=32`, dropout 0,05, nas 7 projeções lineares de cada
+  camada). A loss é calculada só nos tokens da resposta.
+- **Prompt:** o do zero-shot (`v1`), igual na avaliação. A única diferença para a linha
+  "Qwen3-4B, zero-shot" da tabela é o adaptador.
+- **Dados:** amostra estratificada de 12.000 avaliações do treino (de 100.944), 1 época,
+  batch efetivo 16, taxa de aprendizado 2e-4 com aquecimento e queda linear. O treino inteiro
+  não cabe na T4 gratuita. A ablação do BERTimbau mostra o que isso custa: com 10 e 25 mil
+  exemplos ele fica em 0,735 e 0,743, contra 0,761 com todos.
+- **Como rodar:** [`notebooks/qlora_train.ipynb`](notebooks/qlora_train.ipynb) (Colab, T4) ou
+  `make qlora` e depois `python -m src.llm_classify --adapter outputs/qlora/adapter`.
+  O notebook começa com um teste de 20 passos, que mede a velocidade antes do treino.
+
 ## Onde os modelos erram
 
 Análise sobre o teste (`make analysis`), juntando a **nota original** às previsões. O rótulo de
@@ -329,7 +345,8 @@ seed por ponto.
 │   ├── train_bert.py      # fine-tuning do BERTimbau (GPU)
 │   ├── predict_bert.py    # previsões por exemplo do BERTimbau (GPU)
 │   ├── ablation_bert.py   # agrega a curva de dados do BERTimbau
-│   ├── llm_classify.py    # LLM em zero/few-shot (GPU)
+│   ├── llm_classify.py    # LLM em zero/few-shot e com adaptador (GPU)
+│   ├── qlora.py           # fine-tuning QLoRA do LLM (GPU)
 │   ├── predictions.py     # formato das previsões por exemplo (sem texto)
 │   └── analysis.py        # análise de erros e comparação entre modelos
 ├── splits/                # manifest.csv (ids por split) e meta.json (contagens)
@@ -337,7 +354,8 @@ seed por ponto.
 ├── tests/
 ├── notebooks/bertimbau_train.ipynb  # fine-tuning no Kaggle ou no Colab
 ├── notebooks/experimentos_gpu.ipynb # previsões, ablação e LLM na GPU
-└── requirements-train.txt # transformers e accelerate (fora da CI)
+├── notebooks/qlora_train.ipynb      # QLoRA no Colab (T4)
+└── requirements-train.txt # transformers, peft e bitsandbytes (fora da CI)
 ```
 
 ## Licença

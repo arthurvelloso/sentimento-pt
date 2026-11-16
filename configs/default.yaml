@@ -60,3 +60,20 @@ llm:
   shots_per_class: 3 # few-shot: 3 exemplos de cada classe (9 no total)
   eval_subset: null # null = teste inteiro (12.618). Numa GPU lenta, use --max-eval 3000
   dev_subset: 600 # subconjunto da validação, para iterar no prompt
+# QLoRA no LLM acima (src/qlora.py). Treino em amostra estratificada do treino, 1 época.
+qlora:
+  train_subset: 12000 # a T4 grátis não comporta o treino inteiro (100.944); 12 mil fica entre os pontos de 10% e 25% da ablação
+  epochs: 1
+  learning_rate: 2.0e-4 # faixa usual para LoRA: 1e-4 a 3e-4
+  micro_batch_size: 8
+  grad_accum: 2 # batch efetivo de 16
+  warmup_ratio: 0.03
+  max_grad_norm: 1.0
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  log_every: 25
+  hub_repo: null # "usuario/nome": envia o adaptador (privado)
+  output_dir: outputs/qlora
+  results_path: results/qlora_train.json
