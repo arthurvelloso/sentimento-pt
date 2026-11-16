@@ -97,6 +97,61 @@ def compare_models(predictions: dict[str, pd.DataFrame]) -> list[dict[str, Any]]
     return rows
 
 
+def _macro_f1(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Macro-F1 direto de contagens (bem mais rápido que o sklearn dentro do bootstrap)."""
+    scores = []
+    for label in range(len(LABELS)):
+        truth, pred = y_true == label, y_pred == label
+        tp = np.sum(truth & pred)
+        denominator = 2 * tp + np.sum(~truth & pred) + np.sum(truth & ~pred)
+        scores.append(2 * tp / denominator if denominator else 0.0)
+    return float(np.mean(scores))
+
+
+def paired_bootstrap(
+    y_true: Sequence[int],
+    pred_a: Sequence[int],
+    pred_b: Sequence[int],
+    n_boot: int = 1000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Diferença de macro-F1 (A menos B) com intervalo de 95% por bootstrap pareado.
+
+    Reamostra as avaliações do teste com reposição, mantendo a mesma amostra para A e B
+    (pareado), e recalcula a diferença. O intervalo mede a variação **da amostra de teste**;
+    não inclui a variação do treino (seed, inicialização), que exigiria treinar de novo.
+    """
+    y_true, pred_a, pred_b = (np.asarray(x) for x in (y_true, pred_a, pred_b))
+    rng = np.random.default_rng(seed)
+    n = len(y_true)
+    diffs = np.empty(n_boot)
+    for i in range(n_boot):
+        idx = rng.integers(0, n, size=n)
+        diffs[i] = _macro_f1(y_true[idx], pred_a[idx]) - _macro_f1(y_true[idx], pred_b[idx])
+    low, high = np.percentile(diffs, [2.5, 97.5])
+    return {
+        "diff": _macro_f1(y_true, pred_a) - _macro_f1(y_true, pred_b),
+        "ci95": [float(low), float(high)],
+        "share_a_better": float(np.mean(diffs > 0)),
+        "n_boot": n_boot,
+    }
+
+
+def bootstrap_comparisons(aligned: dict[str, pd.DataFrame], seed: int) -> dict[str, Any]:
+    """Diferenças de macro-F1 contra o TF-IDF e do BERTimbau contra cada LLM."""
+    pairs: list[tuple[str, str]] = []
+    if "TF-IDF" in aligned:
+        pairs += [(name, "TF-IDF") for name in aligned if name != "TF-IDF"]
+    if "BERTimbau" in aligned:
+        pairs += [("BERTimbau", name) for name in aligned if name not in ("BERTimbau", "TF-IDF")]
+    result = {}
+    for a, b in pairs:
+        result[f"{a} - {b}"] = paired_bootstrap(
+            aligned[a]["y_true"], aligned[a]["y_pred"], aligned[b]["y_pred"], seed=seed
+        )
+    return result
+
+
 def agreement(a: pd.DataFrame, b: pd.DataFrame) -> dict[str, int]:
     """Quem acerta o que o outro erra, nos exemplos que ambos avaliaram."""
     merged = a.merge(b, on="row_id", suffixes=("_a", "_b"), validate="one_to_one")
@@ -177,6 +232,22 @@ def sample_errors(frame: pd.DataFrame, n: int, seed: int) -> pd.DataFrame:
     return pd.concat(picked).sample(frac=1, random_state=seed).reset_index(drop=True)
 
 
+def has_annotations(path: Path) -> bool:
+    """Se a amostra de erros já tem categorias preenchidas (para não regravá-la por cima)."""
+    return path.exists() and summarize_categories(path)["n_anotados"] > 0
+
+
+def export_categories(annotated: Path, out: Path) -> pd.DataFrame:
+    """Grava a classificação sem o texto das avaliações (só ids, notas e categoria).
+
+    O texto fica de fora porque a base é CC BY-NC-SA 4.0; os ids permitem reconstruí-lo.
+    """
+    frame = pd.read_csv(annotated).drop(columns=["text"], errors="ignore")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    frame.to_csv(out, index=False)
+    return frame
+
+
 def summarize_categories(path: Path) -> dict[str, Any]:
     """Conta as categorias anotadas à mão na amostra de erros."""
     frame = pd.read_csv(path)
@@ -206,7 +277,9 @@ def with_context(predictions: pd.DataFrame, context: pd.DataFrame) -> pd.DataFra
 
 
 def plot_confusions(matrices: dict[str, np.ndarray], path: Path) -> None:
-    fig, axes = plt.subplots(1, len(matrices), figsize=(4.4 * len(matrices), 4), squeeze=False)
+    fig, axes = plt.subplots(
+        1, len(matrices), figsize=(4.6 * len(matrices), 4.2), squeeze=False, layout="constrained"
+    )
     for ax, (name, matrix) in zip(axes[0], matrices.items(), strict=True):
         image = ax.imshow(matrix, vmin=0, vmax=1, cmap="Blues")
         ax.set_xticks(range(len(LABELS)), LABELS, rotation=30)
@@ -264,8 +337,23 @@ def find_predictions(results_dir: Path) -> dict[str, Path]:
     names = {"preds_tfidf.csv": "TF-IDF", "preds_bertimbau.csv": "BERTimbau"}
     found = {names[p.name]: p for p in results_dir.glob("preds_*.csv") if p.name in names}
     for path in sorted(results_dir.glob("preds_llm_*.csv")):
-        found[path.stem.removeprefix("preds_llm_")] = path
+        found[llm_label(path)] = path
     return found
+
+
+def llm_label(preds_path: Path) -> str:
+    """Nome legível de um LLM (ex.: "Qwen3-4B 9-shot"), lido do JSON de resultado ao lado.
+
+    Sem o JSON, cai num nome derivado do arquivo.
+    """
+    stem = preds_path.stem.removeprefix("preds_")  # llm_qwen-qwen3-4b_9shot
+    result_path = preds_path.with_name(f"{stem}.json")
+    if result_path.exists():
+        saved = json.loads(result_path.read_text(encoding="utf-8"))
+        shots = len(saved.get("prompt", {}).get("shots", []))
+        model = str(saved.get("model", stem)).split("/")[-1]
+        return f"{model} {shots}-shot" if shots else f"{model} zero-shot"
+    return stem.removeprefix("llm_").replace("_", " ")
 
 
 def ablation_curves(results_dir: Path) -> dict[str, list[tuple[int, float]]]:
@@ -291,7 +379,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     if args.categorias:
-        print(json.dumps(summarize_categories(Path(args.categorias)), indent=2, ensure_ascii=False))
+        summary = summarize_categories(Path(args.categorias))
+        out = RESULTS_DIR / "categorias_erros_bertimbau.csv"
+        export_categories(Path(args.categorias), out)
+        report_path = RESULTS_DIR / "analysis.json"
+        if report_path.exists():
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            report["categorias_erros_bertimbau"] = summary
+            report_path.write_text(
+                json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+            )
+        print(json.dumps(summary, indent=2, ensure_ascii=False))
+        print(f"classificação sem texto em {out}")
         return
 
     config = load_config()
@@ -328,6 +427,7 @@ def main() -> None:
     names = list(aligned)
     if "TF-IDF" in aligned and "BERTimbau" in aligned:
         report["concordancia_tfidf_bert"] = agreement(aligned["TF-IDF"], aligned["BERTimbau"])
+    report["bootstrap_macro_f1"] = bootstrap_comparisons(aligned, seed)
 
     plot_confusions(matrices, FIGURES_DIR / "confusao.png")
     plot_rating_breakdown(by_rating, FIGURES_DIR / "acuracia_por_nota.png")
@@ -337,14 +437,21 @@ def main() -> None:
 
     target = args.modelo_amostra if args.modelo_amostra in aligned else names[0]
     ANALYSIS_DIR.mkdir(exist_ok=True)
-    sample = sample_errors(with_context(predictions[target], context), args.amostra, seed)
-    sample = sample.assign(
-        verdadeiro=sample["y_true"].map(dict(enumerate(LABELS))),
-        previsto=sample["y_pred"].map(dict(enumerate(LABELS))),
-        categoria="",
-    )[["row_id", "rating", "verdadeiro", "previsto", "text", "categoria"]]
     sample_path = ANALYSIS_DIR / f"erros_{target.lower()}_amostra.csv"
-    sample.to_csv(sample_path, index=False)
+    if has_annotations(sample_path):
+        sample = pd.read_csv(sample_path)
+        print(f"amostra já anotada em {sample_path}: mantida (apague o arquivo para gerar outra)")
+    else:
+        sample = sample_errors(with_context(predictions[target], context), args.amostra, seed)
+        sample = sample.assign(
+            verdadeiro=sample["y_true"].map(dict(enumerate(LABELS))),
+            previsto=sample["y_pred"].map(dict(enumerate(LABELS))),
+            categoria="",
+        )[["row_id", "rating", "verdadeiro", "previsto", "text", "categoria"]]
+        sample.to_csv(sample_path, index=False)
+
+    if has_annotations(sample_path):
+        report["categorias_erros_bertimbau"] = summarize_categories(sample_path)
 
     (RESULTS_DIR / "analysis.json").write_text(
         json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"

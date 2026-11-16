@@ -3,6 +3,18 @@
   "n_comum": 12618,
   "comparacao": [
     {
+      "model": "BERTimbau",
+      "n": 12618,
+      "macro_f1": 0.7608421594469789,
+      "accuracy": 0.8677286416230782,
+      "f1_per_class": {
+        "negativo": 0.9038262668045501,
+        "neutro": 0.4560622914349277,
+        "positivo": 0.9226379201014585
+      },
+      "invalid_share": 0.0
+    },
+    {
       "model": "TF-IDF",
       "n": 12618,
       "macro_f1": 0.7230189970251751,
@@ -13,9 +25,85 @@
         "positivo": 0.8626799557032115
       },
       "invalid_share": 0.0
+    },
+    {
+      "model": "Qwen3-4B zero-shot",
+      "n": 12618,
+      "macro_f1": 0.7106144051922926,
+      "accuracy": 0.8297669995244888,
+      "f1_per_class": {
+        "negativo": 0.8622620380739082,
+        "neutro": 0.3687346652646337,
+        "positivo": 0.9008465122383359
+      },
+      "invalid_share": 0.0
+    },
+    {
+      "model": "Qwen3-4B 9-shot",
+      "n": 12618,
+      "macro_f1": 0.7285900686742018,
+      "accuracy": 0.8152639087018545,
+      "f1_per_class": {
+        "negativo": 0.8746459979132508,
+        "neutro": 0.4257854821235103,
+        "positivo": 0.8853387259858443
+      },
+      "invalid_share": 0.0
     }
   ],
   "por_nota": {
+    "BERTimbau": [
+      {
+        "rating": 1,
+        "n": 2483,
+        "accuracy": 0.9750302053966975,
+        "previsto_como": {
+          "negativo": 0.9750302053966975,
+          "neutro": 0.009665726943213854,
+          "positivo": 0.015304067660088603
+        }
+      },
+      {
+        "rating": 2,
+        "n": 773,
+        "accuracy": 0.8253557567917206,
+        "previsto_como": {
+          "negativo": 0.8253557567917206,
+          "neutro": 0.1410090556274256,
+          "positivo": 0.03363518758085381
+        }
+      },
+      {
+        "rating": 3,
+        "n": 1577,
+        "accuracy": 0.38998097653772984,
+        "previsto_como": {
+          "negativo": 0.20038046924540268,
+          "neutro": 0.38998097653772984,
+          "positivo": 0.40963855421686746
+        }
+      },
+      {
+        "rating": 4,
+        "n": 3173,
+        "accuracy": 0.8843365899779388,
+        "previsto_como": {
+          "negativo": 0.024267254963756698,
+          "neutro": 0.09139615505830444,
+          "positivo": 0.8843365899779388
+        }
+      },
+      {
+        "rating": 5,
+        "n": 4612,
+        "accuracy": 0.9689939288811795,
+        "previsto_como": {
+          "negativo": 0.013226366001734605,
+          "neutro": 0.01777970511708586,
+          "positivo": 0.9689939288811795
+        }
+      }
+    ],
     "TF-IDF": [
       {
         "rating": 1,
@@ -67,9 +155,135 @@
           "positivo": 0.8768430182133564
         }
       }
+    ],
+    "Qwen3-4B zero-shot": [
+      {
+        "rating": 1,
+        "n": 2483,
+        "accuracy": 0.9734192509061619,
+        "previsto_como": {
+          "negativo": 0.9734192509061619,
+          "neutro": 0.02174788562223117,
+          "positivo": 0.004832863471606927
+        }
+      },
+      {
+        "rating": 2,
+        "n": 773,
+        "accuracy": 0.8576972833117723,
+        "previsto_como": {
+          "negativo": 0.8576972833117723,
+          "neutro": 0.13065976714100905,
+          "positivo": 0.01164294954721863
+        }
+      },
+      {
+        "rating": 3,
+        "n": 1577,
+        "accuracy": 0.33354470513633483,
+        "previsto_como": {
+          "negativo": 0.3056436271401395,
+          "neutro": 0.33354470513633483,
+          "positivo": 0.3608116677235257
+        }
+      },
+      {
+        "rating": 4,
+        "n": 3173,
+        "accuracy": 0.8153167349511503,
+        "previsto_como": {
+          "negativo": 0.06019539867633155,
+          "neutro": 0.12448786637251812,
+          "positivo": 0.8153167349511503
+        }
+      },
+      {
+        "rating": 5,
+        "n": 4612,
+        "accuracy": 0.9273633998265395,
+        "previsto_como": {
+          "negativo": 0.0292714657415438,
+          "neutro": 0.04336513443191674,
+          "positivo": 0.9273633998265395
+        }
+      }
+    ],
+    "Qwen3-4B 9-shot": [
+      {
+        "rating": 1,
+        "n": 2483,
+        "accuracy": 0.9488521949254933,
+        "previsto_como": {
+          "negativo": 0.9488521949254933,
+          "neutro": 0.048731373338703185,
+          "positivo": 0.0024164317358034634
+        }
+      },
+      {
+        "rating": 2,
+        "n": 773,
+        "accuracy": 0.7477360931435963,
+        "previsto_como": {
+          "negativo": 0.7477360931435963,
+          "neutro": 0.24579560155239327,
+          "positivo": 0.00646830530401035
+        }
+      },
+      {
+        "rating": 3,
+        "n": 1577,
+        "accuracy": 0.4984147114774889,
+        "previsto_como": {
+          "negativo": 0.20228281547241597,
+          "neutro": 0.4984147114774889,
+          "positivo": 0.2993024730500951
+        }
+      },
+      {
+        "rating": 4,
+        "n": 3173,
+        "accuracy": 0.7529152221872045,
+        "previsto_como": {
+          "negativo": 0.03529782540182792,
+          "neutro": 0.21178695241096754,
+          "positivo": 0.7529152221872045
+        }
+      },
+      {
+        "rating": 5,
+        "n": 4612,
+        "accuracy": 0.9058976582827407,
+        "previsto_como": {
+          "negativo": 0.019080659150043366,
+          "neutro": 0.07502168256721596,
+          "positivo": 0.9058976582827407
+        }
+      }
     ]
   },
   "por_tamanho": {
+    "BERTimbau": [
+      {
+        "faixa": "1-5 palavras",
+        "n": 80,
+        "accuracy": 0.8125
+      },
+      {
+        "faixa": "6-15",
+        "n": 6048,
+        "accuracy": 0.8832671957671958
+      },
+      {
+        "faixa": "16-40",
+        "n": 4943,
+        "accuracy": 0.864657090835525
+      },
+      {
+        "faixa": "mais de 40",
+        "n": 1547,
+        "accuracy": 0.8196509372979961
+      }
+    ],
     "TF-IDF": [
       {
         "faixa": "1-5 palavras",
@@ -91,6 +305,117 @@
         "n": 1547,
         "accuracy": 0.7601809954751131
       }
+    ],
+    "Qwen3-4B zero-shot": [
+      {
+        "faixa": "1-5 palavras",
+        "n": 80,
+        "accuracy": 0.675
+      },
+      {
+        "faixa": "6-15",
+        "n": 6048,
+        "accuracy": 0.8566468253968254
+      },
+      {
+        "faixa": "16-40",
+        "n": 4943,
+        "accuracy": 0.8130689864454784
+      },
+      {
+        "faixa": "mais de 40",
+        "n": 1547,
+        "accuracy": 0.7860374919198448
+      }
+    ],
+    "Qwen3-4B 9-shot": [
+      {
+        "faixa": "1-5 palavras",
+        "n": 80,
+        "accuracy": 0.6625
+      },
+      {
+        "faixa": "6-15",
+        "n": 6048,
+        "accuracy": 0.847718253968254
+      },
+      {
+        "faixa": "16-40",
+        "n": 4943,
+        "accuracy": 0.7920291321060084
+      },
+      {
+        "faixa": "mais de 40",
+        "n": 1547,
+        "accuracy": 0.7705235940530059
+      }
     ]
+  },
+  "concordancia_tfidf_bert": {
+    "n": 12618,
+    "ambos_acertam": 9569,
+    "so_a_acerta": 453,
+    "so_b_acerta": 1380,
+    "ambos_erram": 1216,
+    "ambos_erram_igual": 1082
+  },
+  "bootstrap_macro_f1": {
+    "BERTimbau - TF-IDF": {
+      "diff": 0.037823162421803724,
+      "ci95": [
+        0.02972229693395321,
+        0.047354160085111244
+      ],
+      "share_a_better": 1.0,
+      "n_boot": 1000
+    },
+    "Qwen3-4B zero-shot - TF-IDF": {
+      "diff": -0.012404591832882561,
+      "ci95": [
+        -0.022277946552793425,
+        -0.002775954768737898
+      ],
+      "share_a_better": 0.01,
+      "n_boot": 1000
+    },
+    "Qwen3-4B 9-shot - TF-IDF": {
+      "diff": 0.005571071649026704,
+      "ci95": [
+        -0.0027286062733024473,
+        0.014176479783458616
+      ],
+      "share_a_better": 0.887,
+      "n_boot": 1000
+    },
+    "BERTimbau - Qwen3-4B zero-shot": {
+      "diff": 0.050227754254686285,
+      "ci95": [
+        0.03952172305315378,
+        0.06016569000513615
+      ],
+      "share_a_better": 1.0,
+      "n_boot": 1000
+    },
+    "BERTimbau - Qwen3-4B 9-shot": {
+      "diff": 0.03225209077277702,
+      "ci95": [
+        0.022640651088405923,
+        0.042386481019267834
+      ],
+      "share_a_better": 1.0,
+      "n_boot": 1000
+    }
+  },
+  "categorias_erros_bertimbau": {
+    "n_amostra": 40,
+    "n_anotados": 40,
+    "contagem": {
+      "rótulo duvidoso": 18,
+      "avaliação mista": 12,
+      "sentimento implícito": 2,
+      "erro claro do modelo": 5,
+      "texto pouco informativo": 2,
+      "negação": 1
+    }
   }
 }

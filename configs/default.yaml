@@ -58,5 +58,5 @@ llm:
   max_new_tokens: 6 # a resposta é uma palavra
   batch_size: 16
   shots_per_class: 3 # few-shot: 3 exemplos de cada classe (9 no total)
-  eval_subset: 3000 # subconjunto estratificado do teste (o teste inteiro é lento em T4)
+  eval_subset: null # null = teste inteiro (12.618). Numa GPU lenta, use --max-eval 3000
   dev_subset: 600 # subconjunto da validação, para iterar no prompt

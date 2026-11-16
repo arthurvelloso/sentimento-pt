@@ -253,6 +253,19 @@ def describe_environment(model: Any, dtype: str) -> dict[str, Any]:
     }
 
 
+def resolve_eval_subset(max_eval: int | None, split: str, cfg: dict[str, Any]) -> int | None:
+    """Tamanho do subconjunto avaliado: o pedido na linha de comando, senão o da config.
+
+    ``None`` na config significa o split inteiro. Atenção: o argparse devolve ``None`` para
+    uma flag não passada, então não dá para usar ``dict.get(chave, padrão)`` aqui (a chave
+    existe, com valor ``None``).
+    """
+    if max_eval is not None:
+        return int(max_eval)
+    default = cfg["dev_subset"] if split == "val" else cfg["eval_subset"]
+    return None if default is None else int(default)
+
+
 def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
     cfg = dict(config["llm"]) | {
         k: v for k, v in options.items() if v is not None and k in config["llm"]
@@ -260,8 +273,7 @@ def run(config: dict[str, Any], options: dict[str, Any]) -> dict[str, Any]:
     seed = int(config["seed"])
     split = options.get("split") or "test"
     shots_per_class = int(cfg["shots_per_class"])
-    default_subset = cfg["dev_subset"] if split == "val" else cfg["eval_subset"]
-    subset = options.get("max_eval", default_subset)
+    subset = resolve_eval_subset(options.get("max_eval"), split, cfg)
 
     splits = load_splits(config)
     evaluation = stratified_subset(splits[split], subset, seed)

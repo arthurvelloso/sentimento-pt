@@ -1,0 +1,41 @@
+row_id,rating,verdadeiro,previsto,categoria
+115160,3,neutro,positivo,rótulo duvidoso
+107314,3,neutro,positivo,avaliação mista
+9455,3,neutro,positivo,rótulo duvidoso
+29610,3,neutro,positivo,rótulo duvidoso
+12495,1,negativo,positivo,sentimento implícito
+95328,3,neutro,negativo,avaliação mista
+18404,4,positivo,neutro,avaliação mista
+104234,3,neutro,positivo,erro claro do modelo
+37798,4,positivo,neutro,texto pouco informativo
+93656,3,neutro,negativo,rótulo duvidoso
+83593,3,neutro,positivo,rótulo duvidoso
+65840,3,neutro,negativo,avaliação mista
+97853,3,neutro,positivo,avaliação mista
+44818,4,positivo,neutro,avaliação mista
+123472,4,positivo,neutro,erro claro do modelo
+103408,3,neutro,negativo,avaliação mista
+57934,3,neutro,positivo,rótulo duvidoso
+12851,3,neutro,positivo,rótulo duvidoso
+87159,2,negativo,neutro,avaliação mista
+95307,4,positivo,neutro,erro claro do modelo
+126744,3,neutro,negativo,rótulo duvidoso
+23193,3,neutro,negativo,avaliação mista
+15431,2,negativo,neutro,avaliação mista
+66924,5,positivo,negativo,rótulo duvidoso
+119112,3,neutro,positivo,avaliação mista
+97704,2,negativo,neutro,sentimento implícito
+53387,4,positivo,negativo,rótulo duvidoso
+50716,5,positivo,neutro,rótulo duvidoso
+112535,1,negativo,positivo,erro claro do modelo
+117043,5,positivo,neutro,texto pouco informativo
+59968,3,neutro,positivo,rótulo duvidoso
+96782,4,positivo,neutro,erro claro do modelo
+97958,3,neutro,negativo,rótulo duvidoso
+52758,3,neutro,positivo,rótulo duvidoso
+74842,3,neutro,positivo,rótulo duvidoso
+76494,3,neutro,positivo,rótulo duvidoso
+12561,3,neutro,negativo,avaliação mista
+109491,3,neutro,positivo,rótulo duvidoso
+71818,4,positivo,negativo,rótulo duvidoso
+86542,4,positivo,neutro,negação

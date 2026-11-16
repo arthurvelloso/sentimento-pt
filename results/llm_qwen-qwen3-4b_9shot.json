@@ -1,0 +1,125 @@
+{
+  "name": "Qwen/Qwen3-4B 9-shot",
+  "n": 12618,
+  "accuracy": 0.8152639087018545,
+  "macro_f1": 0.7285900686742018,
+  "f1_per_class": {
+    "negativo": 0.8746459979132508,
+    "neutro": 0.4257854821235103,
+    "positivo": 0.8853387259858443
+  },
+  "support": {
+    "negativo": 3256,
+    "neutro": 1577,
+    "positivo": 7785
+  },
+  "confusion_matrix": {
+    "labels": [
+      "negativo",
+      "neutro",
+      "positivo"
+    ],
+    "rows": "classe verdadeira",
+    "cols": "classe prevista",
+    "values": [
+      [
+        2934,
+        311,
+        11
+      ],
+      [
+        319,
+        786,
+        472
+      ],
+      [
+        200,
+        1018,
+        6567
+      ]
+    ]
+  },
+  "latency": {
+    "p50_ms": 56.113212000013846,
+    "p95_ms": 68.73374250000097,
+    "mean_ms": 58.25698596000393,
+    "n_samples": 100
+  },
+  "model": "Qwen/Qwen3-4B",
+  "split": "test",
+  "shots_per_class": 3,
+  "prompt_version": "v1",
+  "prompt": {
+    "system": "Você classifica o sentimento de avaliações de produtos de uma loja online brasileira. Responda com exatamente uma palavra: negativo, neutro ou positivo.\n- negativo: o cliente está insatisfeito (equivale às notas 1 ou 2 de 5).\n- neutro: opinião mista ou indiferente (equivale à nota 3 de 5).\n- positivo: o cliente está satisfeito (equivale às notas 4 ou 5 de 5).",
+    "shots": [
+      {
+        "row_id": 92020,
+        "text": "Tem o que de tão interessante nessa chave, vou vender meu celular minha casa até meu corpo pra comprar essa chave ai",
+        "label": 1
+      },
+      {
+        "row_id": 87241,
+        "text": "Bom Dia ! Não compre, o produto é falsificado e americanas.com não tem sequer um telefone para reclamar, apenas por e-mail. Fui ao PROCON , VOU PEDIR O LAUDO DO PRODUTO A AB Electrolux , e já vou acionar o meu advogado.",
+        "label": 0
+      },
+      {
+        "row_id": 104098,
+        "text": "A memória é 1x8GB ou 2x4GB, dando o total de 8GB?  Pois só fala que é 8GB, não fala se é 2x4GB",
+        "label": 0
+      },
+      {
+        "row_id": 129170,
+        "text": "Houve uma atenção em especial na entrega  , muito bonita, pratica.",
+        "label": 2
+      },
+      {
+        "row_id": 113294,
+        "text": "Excelente produto, adorei. Super recomendo, ficou lindo.",
+        "label": 1
+      },
+      {
+        "row_id": 12144,
+        "text": "Chegou quebrado, não funcionou, estou até agora tentando receber o dinheiro de volta.",
+        "label": 0
+      },
+      {
+        "row_id": 67959,
+        "text": "Produto ótimo, recebi antes da data prevista. Lojas Americanas super recomendo.",
+        "label": 2
+      },
+      {
+        "row_id": 95730,
+        "text": "Eu recomendo  faz tudo que Informa. Show. E a entrega  veio dentro do prazo.",
+        "label": 2
+      },
+      {
+        "row_id": 11487,
+        "text": "é um bom aparelho, eficiente , tem duas velocidades , porem faz bastante barulho...",
+        "label": 1
+      }
+    ]
+  },
+  "seed": 42,
+  "invalid_share": 0.0,
+  "invalid_examples": [],
+  "subset": {
+    "n": 12618,
+    "of": 12618,
+    "stratified": false
+  },
+  "settings": {
+    "max_chars": 1200,
+    "batch_size": 16,
+    "max_new_tokens": 6
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.22.2",
+    "device": "cuda",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "dtype": "float16",
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "eval_seconds": 352.7
+}

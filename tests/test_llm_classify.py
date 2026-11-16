@@ -104,6 +104,22 @@ def test_select_shots_zero_e_erro_quando_faltam_exemplos():
         select_shots(train_frame(n_per_class=3), per_class=5, seed=0, max_chars=100)
 
 
+CFG = {"eval_subset": None, "dev_subset": 600}
+
+
+def test_subconjunto_usa_o_padrao_quando_a_flag_nao_e_passada():
+    # O argparse devolve None para flag ausente; isso NÃO pode virar "avalie tudo" na validação.
+    assert llm.resolve_eval_subset(None, "val", CFG) == 600
+    assert llm.resolve_eval_subset(None, "test", CFG) is None  # padrão do teste: inteiro
+    assert llm.resolve_eval_subset(None, "test", {**CFG, "eval_subset": 3000}) == 3000
+
+
+def test_subconjunto_pedido_na_linha_de_comando_vence_a_config():
+    assert llm.resolve_eval_subset(250, "val", CFG) == 250
+    assert llm.resolve_eval_subset(3000, "test", CFG) == 3000
+    assert llm.resolve_eval_subset(5, "test", {**CFG, "eval_subset": 3000}) == 5
+
+
 def test_slugify():
     assert slugify("Qwen/Qwen3.5-4B") == "qwen-qwen3-5-4b"
 

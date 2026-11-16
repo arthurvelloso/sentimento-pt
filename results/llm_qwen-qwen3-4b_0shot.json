@@ -1,0 +1,79 @@
+{
+  "name": "Qwen/Qwen3-4B zero-shot",
+  "n": 12618,
+  "accuracy": 0.8297669995244888,
+  "macro_f1": 0.7106144051922926,
+  "f1_per_class": {
+    "negativo": 0.8622620380739082,
+    "neutro": 0.3687346652646337,
+    "positivo": 0.9008465122383359
+  },
+  "support": {
+    "negativo": 3256,
+    "neutro": 1577,
+    "positivo": 7785
+  },
+  "confusion_matrix": {
+    "labels": [
+      "negativo",
+      "neutro",
+      "positivo"
+    ],
+    "rows": "classe verdadeira",
+    "cols": "classe prevista",
+    "values": [
+      [
+        3080,
+        155,
+        21
+      ],
+      [
+        482,
+        526,
+        569
+      ],
+      [
+        326,
+        595,
+        6864
+      ]
+    ]
+  },
+  "latency": {
+    "p50_ms": 43.27378099992529,
+    "p95_ms": 55.847087499955705,
+    "mean_ms": 44.90081236999913,
+    "n_samples": 100
+  },
+  "model": "Qwen/Qwen3-4B",
+  "split": "test",
+  "shots_per_class": 0,
+  "prompt_version": "v1",
+  "prompt": {
+    "system": "Você classifica o sentimento de avaliações de produtos de uma loja online brasileira. Responda com exatamente uma palavra: negativo, neutro ou positivo.\n- negativo: o cliente está insatisfeito (equivale às notas 1 ou 2 de 5).\n- neutro: opinião mista ou indiferente (equivale à nota 3 de 5).\n- positivo: o cliente está satisfeito (equivale às notas 4 ou 5 de 5).",
+    "shots": []
+  },
+  "seed": 42,
+  "invalid_share": 0.0,
+  "invalid_examples": [],
+  "subset": {
+    "n": 12618,
+    "of": 12618,
+    "stratified": false
+  },
+  "settings": {
+    "max_chars": 1200,
+    "batch_size": 16,
+    "max_new_tokens": 6
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.22.2",
+    "device": "cuda",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "dtype": "float16",
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "eval_seconds": 120.9
+}

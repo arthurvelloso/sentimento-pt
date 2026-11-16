@@ -22,6 +22,7 @@ outputs/
 # Manifesto do split e previsões por exemplo (só ids de linha e rótulos, sem texto): versionar.
 !splits/manifest.csv
 !results/preds_*.csv
+!results/categorias_*.csv
 
 # Amostras com o texto das avaliações (para leitura manual): não versionar.
 analysis/

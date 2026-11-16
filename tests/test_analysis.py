@@ -2,18 +2,25 @@
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from src.analysis import (
+    _macro_f1,
     accuracy_by_length,
     accuracy_by_rating,
     agreement,
+    bootstrap_comparisons,
     common_rows,
     compare_models,
     confusion_normalized,
+    export_categories,
     find_predictions,
+    has_annotations,
+    paired_bootstrap,
     sample_errors,
     split_metrics,
     summarize_categories,
@@ -53,6 +60,49 @@ def test_comparacao_usa_so_os_exemplos_em_comum():
     assert table["A"]["n"] == table["B"]["n"] == 2
     assert table["A"]["accuracy"] == 1.0  # A acertou os dois exemplos comuns
     assert table["B"]["accuracy"] == 0.5
+
+
+def test_macro_f1_rapido_bate_com_o_sklearn():
+    rng = np.random.default_rng(0)
+    y_true = rng.integers(0, 3, size=500)
+    y_pred = np.where(rng.random(500) < 0.7, y_true, rng.integers(0, 3, size=500))
+    assert _macro_f1(y_true, y_pred) == pytest.approx(split_metrics(y_true, y_pred)["macro_f1"])
+
+
+def test_bootstrap_de_modelos_identicos_da_diferenca_zero():
+    y = np.random.default_rng(1).integers(0, 3, size=300)
+    result = paired_bootstrap(y, y, y, n_boot=50, seed=0)
+    assert result["diff"] == 0.0
+    assert result["ci95"] == [0.0, 0.0]
+
+
+def test_bootstrap_de_modelo_perfeito_contra_modelo_errado_exclui_o_zero():
+    y = np.random.default_rng(2).integers(0, 3, size=300)
+    wrong = (y + 1) % 3
+    result = paired_bootstrap(y, y, wrong, n_boot=100, seed=0)
+    assert result["diff"] == pytest.approx(1.0)
+    assert result["ci95"][0] > 0.9
+    assert result["share_a_better"] == 1.0
+    # A ordem inverte o sinal.
+    assert paired_bootstrap(y, wrong, y, n_boot=100, seed=0)["diff"] == pytest.approx(-1.0)
+
+
+def test_bootstrap_e_reprodutivel_e_o_intervalo_contem_a_diferenca_observada():
+    rng = np.random.default_rng(3)
+    y = rng.integers(0, 3, size=800)
+    a = np.where(rng.random(800) < 0.8, y, rng.integers(0, 3, size=800))
+    b = np.where(rng.random(800) < 0.7, y, rng.integers(0, 3, size=800))
+    first = paired_bootstrap(y, a, b, n_boot=200, seed=5)
+    assert first == paired_bootstrap(y, a, b, n_boot=200, seed=5)
+    assert first["ci95"][0] < first["diff"] < first["ci95"][1]
+    assert first["diff"] > 0
+
+
+def test_comparacoes_do_bootstrap_escolhem_os_pares_certos():
+    base = preds(range(60), [0, 1, 2] * 20, [0, 1, 2] * 20)
+    aligned = {"TF-IDF": base, "BERTimbau": base, "Qwen 9-shot": base}
+    keys = set(bootstrap_comparisons(aligned, seed=0))
+    assert keys == {"BERTimbau - TF-IDF", "Qwen 9-shot - TF-IDF", "BERTimbau - Qwen 9-shot"}
 
 
 def test_concordancia_entre_dois_modelos():
@@ -133,6 +183,38 @@ def test_resumo_de_categorias_ignora_linhas_sem_anotacao(tmp_path):
     assert summary == {"n_amostra": 4, "n_anotados": 3, "contagem": {"ironia": 2, "texto curto": 1}}
 
 
+def test_amostra_anotada_e_detectada_para_nao_ser_regravada(tmp_path):
+    path = tmp_path / "amostra.csv"
+    assert has_annotations(path) is False  # nem existe
+    pd.DataFrame({"row_id": [1, 2], "categoria": ["", None]}).to_csv(path, index=False)
+    assert has_annotations(path) is False  # existe, mas sem anotação
+    pd.DataFrame({"row_id": [1, 2], "categoria": ["ironia", None]}).to_csv(path, index=False)
+    assert has_annotations(path) is True
+
+
+def test_exportar_categorias_remove_o_texto_e_mantem_ids_e_categoria(tmp_path):
+    annotated = tmp_path / "amostra.csv"
+    pd.DataFrame(
+        {
+            "row_id": [7, 8],
+            "rating": [3, 4],
+            "verdadeiro": ["neutro", "positivo"],
+            "previsto": ["positivo", "neutro"],
+            "text": ["texto da avaliação", "outro texto"],
+            "categoria": ["rótulo duvidoso", "avaliação mista"],
+        }
+    ).to_csv(annotated, index=False)
+
+    out = tmp_path / "saida" / "categorias.csv"
+    frame = export_categories(annotated, out)
+
+    assert "text" not in frame.columns
+    saved = pd.read_csv(out)
+    assert saved["row_id"].tolist() == [7, 8]
+    assert saved["categoria"].tolist() == ["rótulo duvidoso", "avaliação mista"]
+    assert "texto da avaliação" not in out.read_text(encoding="utf-8")
+
+
 def test_encontra_as_previsoes_pelo_nome(tmp_path):
     for name in (
         "preds_tfidf.csv",
@@ -142,4 +224,14 @@ def test_encontra_as_previsoes_pelo_nome(tmp_path):
     ):
         (tmp_path / name).write_text("split,row_id,y_true,y_pred\n", encoding="utf-8")
     found = find_predictions(tmp_path)
-    assert set(found) == {"TF-IDF", "BERTimbau", "qwen-qwen3-4b_9shot"}
+    assert set(found) == {"TF-IDF", "BERTimbau", "qwen-qwen3-4b 9shot"}  # sem JSON: nome do arquivo
+
+
+def test_nome_do_llm_vem_do_json_de_resultado(tmp_path):
+    for shots, name in ((0, "0shot"), (9, "9shot")):
+        (tmp_path / f"preds_llm_qwen-qwen3-4b_{name}.csv").write_text("x\n", encoding="utf-8")
+        payload = {"model": "Qwen/Qwen3-4B", "prompt": {"shots": [{}] * shots}}
+        (tmp_path / f"llm_qwen-qwen3-4b_{name}.json").write_text(
+            json.dumps(payload), encoding="utf-8"
+        )
+    assert set(find_predictions(tmp_path)) == {"Qwen3-4B zero-shot", "Qwen3-4B 9-shot"}

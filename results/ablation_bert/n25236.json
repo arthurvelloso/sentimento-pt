@@ -1,0 +1,151 @@
+{
+  "model": "neuralmind/bert-base-portuguese-cased (fine-tuning completo)",
+  "seed": 42,
+  "is_subset": true,
+  "config": {
+    "learning_rate": 3e-05,
+    "epochs": 3,
+    "batch_size": 32,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "max_length": 96,
+    "max_length_percentile": 95,
+    "truncated_share": 0.047352987795213186,
+    "n_train": 25236,
+    "n_val": 12618,
+    "n_test": 12618
+  },
+  "environment": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.22.2",
+    "device": "cuda",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "fp16": true,
+    "platform": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "training": {
+    "train_seconds": 52.2,
+    "train_samples_per_second": 1459.191,
+    "final_train_loss": 0.34552578911984777,
+    "best_epoch": 3.0,
+    "best_val_macro_f1": 0.7426398532587536,
+    "history": [
+      {
+        "epoch": 1.0,
+        "val_macro_f1": 0.7213972566394654,
+        "val_accuracy": 0.8575051513710572,
+        "val_loss": 0.3819691836833954
+      },
+      {
+        "epoch": 2.0,
+        "val_macro_f1": 0.7315636039839507,
+        "val_accuracy": 0.8628942780155333,
+        "val_loss": 0.3948725461959839
+      },
+      {
+        "epoch": 3.0,
+        "val_macro_f1": 0.7426398532587536,
+        "val_accuracy": 0.854493580599144,
+        "val_loss": 0.4410686194896698
+      }
+    ]
+  },
+  "hub": null,
+  "val": {
+    "name": "bertimbau (validação)",
+    "n": 12618,
+    "accuracy": 0.854493580599144,
+    "macro_f1": 0.7426398532587536,
+    "f1_per_class": {
+      "negativo": 0.8887524934785944,
+      "neutro": 0.42343637670740475,
+      "positivo": 0.9157306895902616
+    },
+    "support": {
+      "negativo": 3256,
+      "neutro": 1577,
+      "positivo": 7785
+    },
+    "confusion_matrix": {
+      "labels": [
+        "negativo",
+        "neutro",
+        "positivo"
+      ],
+      "rows": "classe verdadeira",
+      "cols": "classe prevista",
+      "values": [
+        [
+          2896,
+          248,
+          112
+        ],
+        [
+          245,
+          589,
+          743
+        ],
+        [
+          120,
+          368,
+          7297
+        ]
+      ]
+    },
+    "latency": {
+      "p50_ms": 3.320389000009527,
+      "p95_ms": 3.4833625000032953,
+      "mean_ms": 3.4097632666678614,
+      "n_samples": 300
+    }
+  },
+  "test": {
+    "name": "bertimbau",
+    "n": 12618,
+    "accuracy": 0.8551275954984943,
+    "macro_f1": 0.7433168804738385,
+    "f1_per_class": {
+      "negativo": 0.8905221252488134,
+      "neutro": 0.42289803220035777,
+      "positivo": 0.9165304839723445
+    },
+    "support": {
+      "negativo": 3256,
+      "neutro": 1577,
+      "positivo": 7785
+    },
+    "confusion_matrix": {
+      "labels": [
+        "negativo",
+        "neutro",
+        "positivo"
+      ],
+      "rows": "classe verdadeira",
+      "cols": "classe prevista",
+      "values": [
+        [
+          2908,
+          245,
+          103
+        ],
+        [
+          255,
+          591,
+          731
+        ],
+        [
+          112,
+          382,
+          7291
+        ]
+      ]
+    },
+    "latency": {
+      "p50_ms": 3.261104499983958,
+      "p95_ms": 3.3374929999837377,
+      "mean_ms": 3.2709550366649864,
+      "n_samples": 300
+    }
+  }
+}

@@ -29,7 +29,7 @@ def main() -> None:
     if not data.get("sha256"):
         print(
             f"\nSHA-256 do CSV: {sha256_of(raw_path)}\n"
-            "Cole em `data.sha256` no configs/default.yaml para fixar o arquivo.\n"
+            "Registre em `data.sha256` (configs/default.yaml) para fixar o arquivo.\n"
         )
 
     raw = pd.read_csv(raw_path, usecols=[data["text_col"], data["rating_col"]])
